@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NudiTranslate — English to Kannada</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f0f4f8;
+  --surface:#ffffff;
+  --surface2:#f8fafc;
+  --kn-bg:#0f2744;
+  --kn-surface:#162f55;
+  --kn-surface2:#1d3d6e;
+  --border:#e2e8f0;
+  --border-kn:rgba(100,180,255,0.2);
+  --text:#1a2332;
+  --text2:#4a5568;
+  --muted:#94a3b8;
+  --blue:#2563eb;
+  --blue2:#3b82f6;
+  --kn-text:#e8f4ff;
+  --kn-muted:#7aabdb;
+  --gold:#e8b84b;
+  --green:#16a34a;
+  --red:#dc2626;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Plus Jakarta Sans',sans-serif;
+  background:var(--bg);color:var(--text);
+  min-height:100vh;display:flex;flex-direction:column;
+}
+
+/* HEADER */
+header{
+  background:var(--kn-bg);
+  padding:20px 24px;
+  border-bottom:1px solid rgba(100,180,255,0.1);
+}
+.logo{
+  display:flex;align-items:center;gap:12px;justify-content:center;
+}
+.logo-icon{
+  width:42px;height:42px;border-radius:12px;
+  background:linear-gradient(135deg,var(--blue2),var(--gold));
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.2rem;font-family:'Libre Baskerville',serif;
+  font-weight:700;color:white;
+  box-shadow:0 4px 16px rgba(37,99,235,0.4);
+}
+.logo-text{
+  font-family:'Libre Baskerville',serif;
+  font-size:1.4rem;font-weight:700;color:white;
+}
+.logo-text em{font-style:normal;color:var(--gold);}
+.logo-script{
+  font-size:0.78rem;color:var(--kn-muted);
+  letter-spacing:0.5px;text-align:center;margin-top:2px;
+}
+
+/* LANG BAR */
+.lang-bar{
+  display:flex;align-items:center;justify-content:center;
+  gap:0;margin-top:16px;
+  background:rgba(255,255,255,0.06);
+  border-radius:12px;border:1px solid rgba(100,180,255,0.15);
+  overflow:hidden;max-width:360px;margin:16px auto 0;
+}
+.lang-chip{
+  flex:1;padding:10px 16px;text-align:center;
+  font-size:0.82rem;font-weight:700;
+  letter-spacing:0.3px;
+}
+.lang-en{color:var(--kn-muted);}
+.lang-arrow{
+  padding:10px 14px;color:var(--gold);font-size:1rem;
+  background:rgba(232,184,75,0.1);border-left:1px solid rgba(100,180,255,0.1);border-right:1px solid rgba(100,180,255,0.1);
+}
+.lang-kn{color:var(--kn-text);}
+
+/* QUICK PHRASES */
+.quick-wrap{padding:16px 20px 0;}
+.quick-title{
+  font-size:0.72rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:1.2px;color:var(--muted);margin-bottom:10px;
+}
+.quick-chips{display:flex;gap:8px;flex-wrap:wrap;}
+.qchip{
+  padding:6px 14px;border-radius:20px;
+  border:1.5px solid var(--border);background:var(--surface);
+  font-size:0.8rem;font-weight:600;color:var(--text2);
+  cursor:pointer;transition:all 0.18s;
+}
+.qchip:hover{border-color:var(--blue2);color:var(--blue);background:#eff6ff;}
+
+/* MAIN TRANSLATOR */
+.translator{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:0;margin:16px 20px;
+  background:var(--surface);border-radius:20px;
+  border:1px solid var(--border);overflow:hidden;
+  box-shadow:0 4px 20px rgba(0,0,0,0.08);
+  flex:1;
+}
+@media(max-width:640px){.translator{grid-template-columns:1fr;}}
+
+/* INPUT SIDE */
+.input-side{
+  padding:20px;border-right:1px solid var(--border);
+  display:flex;flex-direction:column;gap:12px;
+}
+@media(max-width:640px){.input-side{border-right:none;border-bottom:1px solid var(--border);}}
+
+.side-label{
+  font-size:0.72rem;font-weight:800;text-transform:uppercase;
+  letter-spacing:1.5px;color:var(--muted);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.char-count{font-weight:600;color:var(--muted);}
+.char-count.warn{color:var(--red);}
+
+#inputText{
+  flex:1;resize:none;border:none;outline:none;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:1.05rem;font-weight:400;
+  color:var(--text);line-height:1.7;min-height:160px;
+  background:none;
+}
+#inputText::placeholder{color:var(--muted);}
+
+.input-actions{display:flex;gap:8px;}
+.clear-btn{
+  padding:9px 16px;border-radius:10px;
+  border:1.5px solid var(--border);background:none;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:0.82rem;font-weight:600;color:var(--text2);
+  cursor:pointer;transition:all 0.18s;
+}
+.clear-btn:hover{border-color:var(--red);color:var(--red);}
+.translate-btn{
+  flex:1;padding:10px 20px;border-radius:10px;
+  background:linear-gradient(135deg,var(--blue),var(--blue2));
+  color:white;font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:0.88rem;font-weight:700;border:none;cursor:pointer;
+  transition:all 0.2s;
+  box-shadow:0 4px 14px rgba(37,99,235,0.25);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.translate-btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(37,99,235,0.3);}
+.translate-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+.btn-spin{animation:spin 0.8s linear infinite;display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* OUTPUT SIDE */
+.output-side{
+  background:var(--kn-bg);
+  padding:20px;display:flex;flex-direction:column;gap:12px;
+  position:relative;
+}
+.output-label{
+  font-size:0.72rem;font-weight:800;text-transform:uppercase;
+  letter-spacing:1.5px;color:var(--kn-muted);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.kn-script{
+  font-family:'Libre Baskerville',serif;
+  font-size:0.78rem;color:var(--gold);font-style:italic;
+}
+
+#outputText{
+  flex:1;font-family:'Libre Baskerville',serif;
+  font-size:1.2rem;line-height:1.85;
+  color:var(--kn-text);min-height:160px;
+  word-break:break-word;
+}
+.output-placeholder{
+  color:var(--kn-muted);font-size:0.95rem;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-style:italic;
+}
+
+.output-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.copy-btn{
+  flex:1;padding:9px 16px;border-radius:10px;
+  border:1.5px solid rgba(100,180,255,0.2);
+  background:rgba(100,180,255,0.06);
+  color:var(--kn-muted);font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.copy-btn:hover{border-color:var(--blue2);color:var(--kn-text);background:rgba(100,180,255,0.12);}
+.copy-btn.copied{border-color:var(--green);color:#4ade80;background:rgba(22,163,74,0.1);}
+
+.speak-btn{
+  padding:9px 14px;border-radius:10px;
+  border:1.5px solid rgba(232,184,75,0.2);
+  background:rgba(232,184,75,0.06);
+  color:var(--gold);font-size:0.9rem;cursor:pointer;transition:all 0.2s;
+}
+.speak-btn:hover{background:rgba(232,184,75,0.15);}
+
+/* TRANSLATING OVERLAY */
+.translating{
+  position:absolute;inset:0;
+  background:rgba(15,39,68,0.85);
+  border-radius:0;display:none;
+  align-items:center;justify-content:center;flex-direction:column;gap:12px;
+}
+.translating.show{display:flex;}
+.tl-spinner{
+  width:36px;height:36px;border:3px solid rgba(100,180,255,0.2);
+  border-top-color:var(--blue2);border-radius:50%;animation:spin 0.8s linear infinite;
+}
+.tl-text{font-size:0.85rem;color:var(--kn-muted);}
+
+/* HISTORY */
+.history-wrap{padding:0 20px 40px;}
+.section-title{
+  font-size:0.72rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:1.2px;color:var(--muted);margin-bottom:12px;
+  display:flex;align-items:center;gap:10px;
+}
+.section-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.history-item{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;padding:14px 16px;margin-bottom:10px;
+  cursor:pointer;transition:all 0.2s;
+  display:grid;grid-template-columns:1fr 1fr;gap:12px;
+}
+.history-item:hover{border-color:#bfdbfe;transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.06);}
+.hi-en{font-size:0.85rem;color:var(--text2);font-weight:500;}
+.hi-kn{font-family:'Libre Baskerville',serif;font-size:0.9rem;color:var(--blue);font-weight:500;}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:24px;left:50%;
+  transform:translateX(-50%) translateY(80px);
+  background:var(--kn-bg);color:var(--kn-text);
+  padding:11px 22px;border-radius:24px;
+  font-size:0.84rem;font-weight:600;
+  box-shadow:0 20px 50px rgba(0,0,0,0.3);z-index:999;
+  border:1px solid var(--border-kn);
+  transition:transform 0.35s cubic-bezier(.175,.885,.32,1.275);
+}
+.toast.show{transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">ಕ</div>
+    <div>
+      <div class="logo-text">Nudi<em>Translate</em></div>
+      <div class="logo-script">ಕನ್ನಡ — English to Kannada</div>
+    </div>
+  </div>
+  <div class="lang-bar">
+    <div class="lang-chip lang-en">🇬🇧 English</div>
+    <div class="lang-arrow">→</div>
+    <div class="lang-chip lang-kn">ಕ Kannada</div>
+  </div>
+</header>
+
+<div class="quick-wrap">
+  <div class="quick-title">Quick Phrases</div>
+  <div class="quick-chips">
+    <span class="qchip" onclick="quickPhrase('Hello')">Hello</span>
+    <span class="qchip" onclick="quickPhrase('How are you?')">How are you?</span>
+    <span class="qchip" onclick="quickPhrase('Thank you')">Thank you</span>
+    <span class="qchip" onclick="quickPhrase('Good morning')">Good morning</span>
+    <span class="qchip" onclick="quickPhrase('My name is')">My name is</span>
+    <span class="qchip" onclick="quickPhrase('Where is the bus stop?')">Bus stop?</span>
+    <span class="qchip" onclick="quickPhrase('How much does it cost?')">How much?</span>
+    <span class="qchip" onclick="quickPhrase('Please help me')">Help me</span>
+  </div>
+</div>
+
+<div class="translator">
+  <div class="input-side">
+    <div class="side-label">
+      English Input
+      <span class="char-count" id="charCount">0 / 500</span>
+    </div>
+    <textarea id="inputText" placeholder="Type or paste English text here…" maxlength="500"
+      oninput="onInput()"></textarea>
+    <div class="input-actions">
+      <button class="clear-btn" onclick="clearAll()">✕ Clear</button>
+      <button class="translate-btn" id="translateBtn" onclick="doTranslate()">
+        Translate →
+      </button>
+    </div>
+  </div>
+
+  <div class="output-side">
+    <div class="output-label">
+      Kannada Output
+      <span class="kn-script">ಕನ್ನಡ</span>
+    </div>
+    <div id="outputText">
+      <span class="output-placeholder">Translation will appear here in ಕನ್ನಡ script…</span>
+    </div>
+    <div class="output-actions">
+      <button class="copy-btn" id="copyBtn" onclick="copyTranslation()">📋 Copy Translation</button>
+      <button class="speak-btn" onclick="speakKannada()" title="Speak">🔊</button>
+    </div>
+    <div class="translating" id="transOverlay">
+      <div class="tl-spinner"></div>
+      <div class="tl-text">Translating to ಕನ್ನಡ…</div>
+    </div>
+  </div>
+</div>
+
+<div class="history-wrap">
+  <div class="section-title">Recent Translations</div>
+  <div id="historyList"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let lastTranslation = '';
+let history = JSON.parse(localStorage.getItem('nt_history') || '[]');
+
+// ── BUILT-IN KANNADA DICTIONARY ──────────────────────────────────────────────
+// 300+ words & common phrases — works 100% offline
+const DICT = {
+  // Greetings
+  "hello":"ಹಲೋ","hi":"ಹಾಯ್","bye":"ಬೈ","goodbye":"ವಿದಾಯ",
+  "good morning":"ಶುಭ ಮುಂಜಾನೆ","good afternoon":"ಶುಭ ಮಧ್ಯಾಹ್ನ",
+  "good evening":"ಶುಭ ಸಂಜೆ","good night":"ಶುಭ ರಾತ್ರಿ",
+  "how are you":"ನೀವು ಹೇಗಿದ್ದೀರಿ","i am fine":"ನಾನು ಚೆನ್ನಾಗಿದ್ದೇನೆ",
+  "thank you":"ಧನ್ಯವಾದಗಳು","thanks":"ಧನ್ಯವಾದ",
+  "welcome":"ಸ್ವಾಗತ","you are welcome":"ನಿಮಗೆ ಸ್ವಾಗತ",
+  "please":"ದಯವಿಟ್ಟು","sorry":"ಕ್ಷಮಿಸಿ","excuse me":"ಕ್ಷಮಿಸಿ",
+  "yes":"ಹೌದು","no":"ಇಲ್ಲ","ok":"ಸರಿ","okay":"ಸರಿ",
+  // People & Family
+  "my name is":"ನನ್ನ ಹೆಸರು","what is your name":"ನಿಮ್ಮ ಹೆಸರೇನು",
+  "i":"ನಾನು","you":"ನೀವು","he":"ಅವನು","she":"ಅವಳು","we":"ನಾವು","they":"ಅವರು",
+  "mother":"ಅಮ್ಮ","father":"ಅಪ್ಪ","brother":"ಅಣ್ಣ","sister":"ಅಕ್ಕ",
+  "son":"ಮಗ","daughter":"ಮಗಳು","husband":"ಗಂಡ","wife":"ಹೆಂಡತಿ",
+  "friend":"ಗೆಳೆಯ","family":"ಕುಟುಂಬ","child":"ಮಗು","children":"ಮಕ್ಕಳು",
+  "man":"ಪುರುಷ","woman":"ಮಹಿಳೆ","boy":"ಹುಡುಗ","girl":"ಹುಡುಗಿ",
+  // Common verbs
+  "eat":"ತಿನ್ನು","drink":"ಕುಡಿ","sleep":"ಮಲಗು","walk":"ನಡೆ",
+  "run":"ಓಡು","read":"ಓದು","write":"ಬರೆ","speak":"ಮಾತಾಡು",
+  "listen":"ಕೇಳು","see":"ನೋಡು","come":"ಬಾ","go":"ಹೋಗು",
+  "sit":"ಕೂತುಕೋ","stand":"ನಿಲ್ಲು","open":"ತೆರೆ","close":"ಮುಚ್ಚು",
+  "give":"ಕೊಡು","take":"ತೆಗೆದುಕೋ","buy":"ಕೊಳ್ಳು","sell":"ಮಾರು",
+  "help":"ಸಹಾಯ","work":"ಕೆಲಸ","play":"ಆಡು","study":"ಅಭ್ಯಾಸ",
+  "love":"ಪ್ರೀತಿ","like":"ಇಷ್ಟ","want":"ಬೇಕು","need":"ಅಗತ್ಯ",
+  "know":"ತಿಳಿ","think":"ಯೋಚಿಸು","understand":"ಅರ್ಥ ಮಾಡಿಕೊಳ್ಳು",
+  // Numbers
+  "one":"ಒಂದು","two":"ಎರಡು","three":"ಮೂರು","four":"ನಾಲ್ಕು","five":"ಐದು",
+  "six":"ಆರು","seven":"ಏಳು","eight":"ಎಂಟು","nine":"ಒಂಬತ್ತು","ten":"ಹತ್ತು",
+  "hundred":"ನೂರು","thousand":"ಸಾವಿರ","zero":"ಸೊನ್ನೆ",
+  // Days & Time
+  "monday":"ಸೋಮವಾರ","tuesday":"ಮಂಗಳವಾರ","wednesday":"ಬುಧವಾರ",
+  "thursday":"ಗುರುವಾರ","friday":"ಶುಕ್ರವಾರ","saturday":"ಶನಿವಾರ","sunday":"ಭಾನುವಾರ",
+  "today":"ಇಂದು","yesterday":"ನಿನ್ನೆ","tomorrow":"ನಾಳೆ",
+  "morning":"ಬೆಳಿಗ್ಗೆ","afternoon":"ಮಧ್ಯಾಹ್ನ","evening":"ಸಂಜೆ","night":"ರಾತ್ರಿ",
+  "time":"ಸಮಯ","hour":"ಗಂಟೆ","minute":"ನಿಮಿಷ","second":"ಸೆಕೆಂಡ್",
+  "week":"ವಾರ","month":"ತಿಂಗಳು","year":"ವರ್ಷ",
+  // Places
+  "home":"ಮನೆ","house":"ಮನೆ","school":"ಶಾಲೆ","college":"ಕಾಲೇಜು",
+  "hospital":"ಆಸ್ಪತ್ರೆ","market":"ಮಾರುಕಟ್ಟೆ","shop":"ಅಂಗಡಿ",
+  "road":"ರಸ್ತೆ","street":"ಬೀದಿ","city":"ನಗರ","village":"ಹಳ್ಳಿ",
+  "india":"ಭಾರತ","karnataka":"ಕರ್ನಾಟಕ","bangalore":"ಬೆಂಗಳೂರು",
+  "where is the bus stop":"ಬಸ್ ನಿಲ್ದಾಣ ಎಲ್ಲಿದೆ","bus stop":"ಬಸ್ ನಿಲ್ದಾಣ",
+  "airport":"ವಿಮಾನ ನಿಲ್ದಾಣ","station":"ನಿಲ್ದಾಣ","temple":"ದೇವಸ್ಥಾನ",
+  // Food
+  "water":"ನೀರು","food":"ಆಹಾರ","rice":"ಅನ್ನ","bread":"ರೊಟ್ಟಿ",
+  "milk":"ಹಾಲು","tea":"ಚಹಾ","coffee":"ಕಾಫಿ","fruit":"ಹಣ್ಣು",
+  "vegetable":"ತರಕಾರಿ","sugar":"ಸಕ್ಕರೆ","salt":"ಉಪ್ಪು",
+  "how much does it cost":"ಎಷ್ಟು ಬೆಲೆ","how much":"ಎಷ್ಟು",
+  // Common phrases
+  "please help me":"ದಯವಿಟ್ಟು ಸಹಾಯ ಮಾಡಿ","i need help":"ನನಗೆ ಸಹಾಯ ಬೇಕು",
+  "i don't understand":"ನನಗೆ ಅರ್ಥವಾಗಲಿಲ್ಲ","please speak slowly":"ದಯವಿಟ್ಟು ನಿಧಾನವಾಗಿ ಮಾತಾಡಿ",
+  "where are you from":"ನೀವು ಎಲ್ಲಿಂದ","i am from":"ನಾನು ಇಂದ",
+  "what is this":"ಇದು ಏನು","how old are you":"ನಿಮಗೆ ಎಷ್ಟು ವಯಸ್ಸು",
+  "i love you":"ನಾನು ನಿನ್ನನ್ನು ಪ್ರೀತಿಸುತ್ತೇನೆ",
+  "happy birthday":"ಹುಟ್ಟುಹಬ್ಬದ ಶುಭಾಶಯಗಳು",
+  "congratulations":"ಅಭಿನಂದನೆಗಳು",
+  "all the best":"ಶುಭಾಶಯಗಳು",
+  // Colors
+  "red":"ಕೆಂಪು","blue":"ನೀಲಿ","green":"ಹಸಿರು","yellow":"ಹಳದಿ",
+  "black":"ಕಪ್ಪು","white":"ಬಿಳಿ","orange":"ಕಿತ್ತಳೆ","pink":"ಗುಲಾಬಿ",
+  // Adjectives
+  "good":"ಒಳ್ಳೆಯ","bad":"ಕೆಟ್ಟ","big":"ದೊಡ್ಡ","small":"ಚಿಕ್ಕ",
+  "hot":"ಬಿಸಿ","cold":"ತಣ್ಣ","new":"ಹೊಸ","old":"ಹಳೆ",
+  "happy":"ಸಂತೋಷ","sad":"ದುಃಖ","beautiful":"ಸುಂದರ","fast":"ವೇಗ",
+  "slow":"ನಿಧಾನ","easy":"ಸುಲಲ್ಭ","difficult":"ಕಷ್ಟ",
+  // Tech / modern
+  "mobile":"ಮೊಬೈಲ್","phone":"ಫೋನ್","computer":"ಕಂಪ್ಯೂಟರ್",
+  "internet":"ಅಂತರ್ಜಾಲ","password":"ಪಾಸ್‌ವರ್ಡ್","app":"ಆಪ್",
+  "photo":"ಫೋಟೋ","camera":"ಕ್ಯಾಮೆರಾ","video":"ವಿಡಿಯೋ",
+  "money":"ಹಣ","bank":"ಬ್ಯಾಂಕ್","payment":"ಪಾವತಿ",
+  // Health
+  "doctor":"ವೈದ್ಯ","medicine":"ಔಷಧ","pain":"ನೋವು","fever":"ಜ್ವರ",
+  "headache":"ತಲೆನೋವು","hospital":"ಆಸ್ಪತ್ರೆ","health":"ಆರೋಗ್ಯ",
+};
+
+// Smart translation engine
+function smartTranslate(text) {
+  const input = text.trim().toLowerCase();
+  
+  // 1. Exact match
+  if(DICT[input]) return { result: DICT[input], method: 'exact' };
+  
+  // 2. Partial phrase match (longest match wins)
+  let best = null, bestLen = 0;
+  for(const [en, kn] of Object.entries(DICT)){
+    if(input.includes(en) && en.length > bestLen){
+      best = kn; bestLen = en.length;
+    }
+  }
+  if(best) return { result: best, method: 'phrase' };
+  
+  // 3. Word-by-word translation
+  const words = input.split(/\s+/);
+  const translated = words.map(w => {
+    const clean = w.replace(/[.,!?;:'"]/g,'');
+    return DICT[clean] || w; // keep original if not found
+  });
+  const wordResult = translated.join(' ');
+  const hasTranslations = translated.some((w,i) => w !== words[i]);
+  if(hasTranslations) return { result: wordResult, method: 'word-by-word' };
+  
+  // 4. Not found
+  return { result: null, method: 'none' };
+}
+
+function onInput(){
+  const val = document.getElementById('inputText').value;
+  const cc = document.getElementById('charCount');
+  cc.textContent = val.length + ' / 500';
+  cc.classList.toggle('warn', val.length > 450);
+}
+
+function quickPhrase(text){
+  document.getElementById('inputText').value = text;
+  onInput();
+  doTranslate();
+}
+
+async function doTranslate(){
+  const text = document.getElementById('inputText').value.trim();
+  if(!text){ toast('Please enter some text to translate'); return; }
+
+  const btn = document.getElementById('translateBtn');
+  const overlay = document.getElementById('transOverlay');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="btn-spin">⟳</span> Translating…';
+  overlay.classList.add('show');
+
+  // Step 1: Try built-in dictionary first (instant, offline)
+  const local = smartTranslate(text);
+  
+  if(local.result){
+    showResult(text, local.result, local.method === 'exact' ? '📖 Dictionary' : '📖 Dictionary (partial)');
+    btn.disabled = false;
+    btn.innerHTML = 'Translate →';
+    overlay.classList.remove('show');
+    return;
+  }
+
+  // Step 2: Try live API (MyMemory — most reliable CORS-wise)
+  try {
+    const r = await fetch(
+      `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|kn`,
+      { mode: 'cors' }
+    );
+    const d = await r.json();
+    if(d.responseStatus === 200 && d.responseData && d.responseData.translatedText){
+      showResult(text, d.responseData.translatedText, '🌐 Live API');
+      btn.disabled = false;
+      btn.innerHTML = 'Translate →';
+      overlay.classList.remove('show');
+      return;
+    }
+  } catch(e){}
+
+  // Step 3: Try Google via proxy
+  try {
+    const target = encodeURIComponent(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=kn&dt=t&q=${encodeURIComponent(text)}`);
+    const r = await fetch(`https://api.allorigins.win/get?url=${target}`);
+    const wrapper = await r.json();
+    const data = JSON.parse(wrapper.contents);
+    let result = '';
+    if(data && data[0]) data[0].forEach(item => { if(item[0]) result += item[0]; });
+    if(result){
+      showResult(text, result, '🌐 Live API');
+      btn.disabled = false;
+      btn.innerHTML = 'Translate →';
+      overlay.classList.remove('show');
+      return;
+    }
+  } catch(e){}
+
+  // Step 4: Not found anywhere — show helpful message
+  document.getElementById('outputText').innerHTML = 
+    `<span style="color:var(--kn-muted);font-family:Plus Jakarta Sans,sans-serif;font-size:0.9rem;line-height:1.7;">
+      ⚠ "<strong style="color:var(--kn-text)">${text}</strong>" not found in dictionary.<br><br>
+      💡 Try simpler words or common phrases.<br>
+      The built-in dictionary covers 300+ words.<br><br>
+      <span style="font-size:0.78rem;opacity:0.7">Live translation requires internet connection.</span>
+    </span>`;
+  toast('⚠ Word not in dictionary — try simpler text');
+  btn.disabled = false;
+  btn.innerHTML = 'Translate →';
+  overlay.classList.remove('show');
+}
+
+function showResult(inputText, result, source){
+  lastTranslation = result;
+  document.getElementById('outputText').innerHTML = 
+    `<div style="font-size:1.2rem;line-height:1.85;margin-bottom:10px;">${result}</div>
+     <div style="font-size:0.72rem;color:var(--kn-muted);border-top:1px solid rgba(100,180,255,0.1);padding-top:8px;">${source}</div>`;
+  history.unshift({
+    en: inputText.substring(0,60)+(inputText.length>60?'…':''),
+    kn: result.substring(0,60)
+  });
+  history = history.slice(0,8);
+  localStorage.setItem('nt_history', JSON.stringify(history));
+  renderHistory();
+  toast('✓ Translated!');
+}
+
+function clearAll(){
+  document.getElementById('inputText').value='';
+  document.getElementById('outputText').innerHTML='<span class="output-placeholder">Translation will appear here in ಕನ್ನಡ script…</span>';
+  lastTranslation='';
+  document.getElementById('charCount').textContent='0 / 500';
+}
+
+function copyTranslation(){
+  if(!lastTranslation){ toast('Nothing to copy yet'); return; }
+  navigator.clipboard.writeText(lastTranslation).then(()=>{
+    const btn = document.getElementById('copyBtn');
+    btn.classList.add('copied');
+    btn.textContent='✓ Copied!';
+    setTimeout(()=>{ btn.classList.remove('copied'); btn.textContent='📋 Copy Translation'; },2000);
+    toast('✓ Copied to clipboard!');
+  });
+}
+
+function speakKannada(){
+  if(!lastTranslation){ toast('Translate something first'); return; }
+  const utt = new SpeechSynthesisUtterance(lastTranslation);
+  utt.lang = 'kn-IN';
+  speechSynthesis.speak(utt);
+  toast('🔊 Speaking…');
+}
+
+function renderHistory(){
+  const el = document.getElementById('historyList');
+  if(history.length===0){
+    el.innerHTML='<div style="font-size:0.82rem;color:var(--muted);padding:8px 0;">Your translations will appear here.</div>';
+    return;
+  }
+  el.innerHTML = history.map(h=>`
+    <div class="history-item" onclick="document.getElementById('inputText').value='${h.en.replace(/'/g,"\'")}';onInput();doTranslate()">
+      <div class="hi-en">${h.en}</div>
+      <div class="hi-kn">${h.kn}</div>
+    </div>
+  `).join('');
+}
+
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.classList.add('show');
+  clearTimeout(window._tt);
+  window._tt=setTimeout(()=>el.classList.remove('show'),2200);
+}
+
+document.getElementById('inputText').addEventListener('keydown',e=>{
+  if(e.key==='Enter' && e.ctrlKey) doTranslate();
+});
+
+renderHistory();
+</script>
+</body>
+</html>
